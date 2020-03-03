@@ -28,7 +28,7 @@ class TFModelTrainer:
         # set up data layer
         self.training_filenames = glob.glob(os.path.join(data_path, 'train_*.tfrecord'))
         self.validation_filenames = glob.glob(os.path.join(data_path, 'test_*.tfrecord'))
-        self.iterator, self.filenames = self._data_layer()
+        self.iterator, self.filenames = self.data_layer()
         self.num_val_samples = 1000
         self.num_classes = 3
         self.image_height = 352
@@ -46,7 +46,7 @@ class TFModelTrainer:
         image = image / 255.0
         return image
 
-    def _parse_tfrecord(self, example_proto): #####################################
+    def parse_tfrecord(self, example_proto): #####################################
         keys_to_features = {'image': tf.FixedLenFeature([], tf.string),
                             'label': tf.FixedLenFeature([], tf.int64)}
         parsed_features = tf.parse_single_example(example_proto, keys_to_features)
@@ -55,31 +55,31 @@ class TFModelTrainer:
         image = self.preprocess_image(image)
         return image, label
 
-    def _data_layer(self, num_threads=8, prefetch_buffer=100):
+    def data_layer(self, num_threads=8, prefetch_buffer=100):
         with tf.variable_scope('data'):
             filenames = tf.placeholder(tf.string, shape=[None])
             dataset = tf.data.TFRecordDataset(filenames) ##########################
-            dataset = dataset.map(self._parse_tfrecord, num_parallel_calls=num_threads)
+            dataset = dataset.map(self.parse_tfrecord, num_parallel_calls=num_threads)
             dataset = dataset.repeat()
             dataset = dataset.batch(self.batch_size)
             dataset = dataset.prefetch(prefetch_buffer)
             iterator = dataset.make_initializable_iterator()
         return iterator, filenames
 
-    def _loss_functions(self, logits, labels):
+    def loss_functions(self, logits, labels):
         with tf.variable_scope('loss'):
             target_prob = tf.one_hot(labels, self.num_classes)
             tf.losses.softmax_cross_entropy(target_prob, logits)
             total_loss = tf.losses.get_total_loss() #include regularization loss
         return total_loss
 
-    def _optimizer(self, total_loss, global_step):
+    def optimizer(self, total_loss, global_step):
         with tf.variable_scope('optimizer'):
             optimizer = tf.train.AdamOptimizer(learning_rate=self.learning_rate, epsilon=0.1)
             optimizer = optimizer.minimize(total_loss, global_step=global_step)
         return optimizer
 
-    def _performance_metric(self, logits, labels):
+    def performance_metric(self, logits, labels):
         with tf.variable_scope("performance_metric"):
             predicted = tf.argmax(logits, axis=1)
             labels = tf.cast(labels, tf.int64)
@@ -95,9 +95,9 @@ class TFModelTrainer:
         images, labels = self.iterator.get_next()
         images = tf.image.resize_bilinear(images, (self.image_height, self.image_width))
         logits = model(images, num_classes=self.num_classes)
-        loss = self._loss_functions(logits, labels)
-        optimizer = self._optimizer(loss, global_step)
-        accuracy = self._performance_metric(logits, labels)
+        loss = self.loss_functions(logits, labels)
+        optimizer = self.optimizer(loss, global_step)
+        accuracy = self.performance_metric(logits, labels)
 
         # Create a summary operation to log the progress of the network
         with tf.variable_scope('logging'):
