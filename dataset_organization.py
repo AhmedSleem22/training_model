@@ -1,3 +1,18 @@
+'''
+In order to run the dataset_organization.py code, you have to write something similar to the following example in the OS Terminal:
+
+$ python dataset_organization.py --input_dir ./dataset --left_dir ./dataset/Left --right_dir ./dataset/Right --forword_dir ./dataset/Forword
+
+where:
+
+    1. input_dir is the directory of the dataset folder.
+
+    2. left_dir is the directory of the dataset left folder.
+
+    3. right_dir is the directory of the dataset right folder.
+
+    4. forword_dir is the directory of the dataset forword folder.
+'''
 import shutil, os
 import argparse
 import numpy as np
@@ -5,10 +20,7 @@ import csv
 
 def main(args):
     # Load training data set from CSV file
-    #training_data_df = pd.read_csv("data_file.csv", sep=',')
-
-    # Pull out columns for X (data to train with) and Y (value to predict)
-    with open("data_file.csv", 'r') as read_obj:
+    with open(os.path.join(args.input_dir, "data_file.csv"), 'r') as read_obj:
         csv_reader = csv.DictReader(read_obj, delimiter=',')
 
         right  = []
@@ -28,28 +40,25 @@ def main(args):
                     [int(line['Right']), int(line['Forword']), int(line['Left'])] == [1, 0, 0]):
                 right.append(line['Images'])
 
-    print(left)
-    print(forword)
-    print(right)
 
     for l in left:
-        shutil.move(l, args.left_dir)
+        shutil.move(os.path.join(args.input_dir, l), args.left_dir)
 
     for f in forword:
-        shutil.move(f, args.forword_dir)
+        shutil.move(os.path.join(args.input_dir, f), args.forword_dir)
 
     for r in right:
-        shutil.move(r, args.right_dir)
+        shutil.move(os.path.join(args.input_dir, r), args.right_dir)
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--left_dir', type=str, default='Left',
+    parser.add_argument('--left_dir', type=str, default='./dataset/Left',
                         help='path to the directory where the left images will be saved to')
-    parser.add_argument('--forword_dir', type=str, default='Forword',
+    parser.add_argument('--forword_dir', type=str, default='./dataset/Forword',
                         help='path to the directory where the forword images will be saved to')
-    parser.add_argument('--right_dir', type=str, default='Right',
+    parser.add_argument('--right_dir', type=str, default='./dataset/Right',
                         help='path to the directory where the right images will be saved to')
 
     args = parser.parse_args()

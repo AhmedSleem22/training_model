@@ -131,7 +131,7 @@ def model(input_layer, num_classes=3):
     print("dropout = {}".format(layer_12_output.shape))
 
     with tf.variable_scope('output'):
-        prediction = tf.layers.dense(layer_12_output, 3)
+        prediction = tf.layers.dense(layer_12_output, num_classes)
         prediction = tf.nn.softmax(prediction)
 
     print("output= {}".format(prediction.shape))
