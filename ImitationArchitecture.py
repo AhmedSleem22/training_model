@@ -60,7 +60,7 @@ def model(input_layer, num_classes=3):
         layer_4_output = tf.nn.bias_add(layer_4_output, biases)
         layer_4_output = tf.nn.elu(layer_4_output)
 
-    print("con4 = {}".format(layer_4_output.shape))
+    print("Convolutional 4 = {}".format(layer_4_output.shape))
 
 
     with tf.variable_scope('layer_5'):
@@ -70,7 +70,7 @@ def model(input_layer, num_classes=3):
         layer_5_output = tf.nn.bias_add(layer_5_output, biases)
         layer_5_output = tf.nn.elu(layer_5_output)
 
-    print("con5 = {}".format(layer_5_output.shape))
+    print("Convolutional 5 = {}".format(layer_5_output.shape))
 
 
     with tf.variable_scope('layer_6'):
