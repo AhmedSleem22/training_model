@@ -54,6 +54,8 @@ def main(args):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
+    parser.add_argument('--input_dir', type=str, default='./dataset',
+                        help='path to the directory of the dataset folder')
     parser.add_argument('--left_dir', type=str, default='./dataset/Left',
                         help='path to the directory where the left images will be saved to')
     parser.add_argument('--forword_dir', type=str, default='./dataset/Forword',
