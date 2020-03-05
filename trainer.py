@@ -21,7 +21,7 @@ class TFModelTrainer:
         self.learning_rate = 0.002
         self.training_epochs = 2500     # 100 epoch
         self.save_iter = 25
-        self.val_iter = 100
+        self.val_iter = 800
         self.log_iter = 25
         self.batch_size = 32
 
@@ -33,6 +33,7 @@ class TFModelTrainer:
         self.num_classes = 3
         self.image_height = 352
         self.image_width = 288
+        self.image_size = 224
 
     def preprocess_image(self, image_string):
         # Decode the image to get array of its pixels
@@ -124,13 +125,11 @@ class TFModelTrainer:
         with tf.variable_scope('logging'):
             # summary placeholders
             streaming_loss_p = tf.placeholder(tf.float32)
-            streaming_accuracy_p = tf.placeholder(tf.float32)
+            accuracy_p = tf.placeholder(tf.float32)
 
-            summary_op_train = tf.summary.merge([
-                tf.summary.scalar('streaming_loss', streaming_loss_p),
-                tf.summary.scalar('streaming_accuracy', streaming_accuracy_p)
-            ])
-            summary_op_test = tf.summary.scalar('streaming_loss', streaming_loss_p)
+            summary_op_train = tf.summary.scalar('streaming_loss', streaming_loss_p)
+            summary_op_test = tf.summary.scalar('accuracy', accuracy_p)
+
         # Create ops to save and restore all the variables.
         with tf.variable_scope('saving'):
             saver = tf.train.Saver(max_to_keep=None)  # keep all checkpoints
@@ -158,36 +157,24 @@ class TFModelTrainer:
             initial_step = global_step.eval()
 
             # Running training Set
-            streaming_loss = 0
-            streaming_accuracy = 0
             # One epoch is one full run through the training data set.
+            streaming_loss = 0
             for epoch in range(initial_step, self.training_epochs + 1):
                 # Run the optimizer over and over to train the network.
                 session.run(optimizer)
                 # Get the current accuracy scores by running the "cost" operation on the training and test data sets
-                loss_batch = session.run([loss, accuracy])
+                loss_batch = session.run(loss)
 
+                # Log summary
                 streaming_loss += loss_batch
-                streaming_accuracy += accuracy_batch
                 if epoch % self.log_iter == self.log_iter - 1:
                     streaming_loss /= self.log_iter
-<<<<<<< HEAD
-                    print("Iteration: {}, Training loss: {:.2f}, Training accuracy: {:.2f}".format(epoch + 1, streaming_loss, streaming_accuracy))
-                    training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss,
-                                                                                streaming_accuracy_p: streaming_accuracygit})
-||||||| merged common ancestors
                     print("Epoch: {} - Training Cost: {}".format(epoch + 1, streaming_loss))
                     training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss})
-=======
-                    print("Iteration: {}, Training loss: {:.2f}, Training accuracy: {:.2f}".format(epoch + 1, streaming_loss, streaming_accuracy))
-                    training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss,
-                                                                                streaming_accuracy_p: streaming_accuracy}})
->>>>>>> 24c263a121ef94b5e4d7a03d33416fe5633d52d6
                     # Write the current training status to the log files (Which we can view with TensorBoard)
                     training_writer.add_summary(training_summary, global_step=epoch)
 
                     streaming_loss = 0
-                    streaming_accuracy = 0
 
                 # Save model
                 if epoch % self.save_iter == self.save_iter - 1:
@@ -207,7 +194,7 @@ class TFModelTrainer:
 
                     print("Accuracy: {}".format(validation_accuracy))
 
-                    testing_summary = session.run(summary_op_test, feed_dict={streaming_accuracy_p: validation_accuracy})
+                    testing_summary = session.run(summary_op_test, feed_dict={accuracy_p: validation_accuracy})
                     # Write the current testing status to the log files (Which we can view with TensorBoard)
                     testing_writer.add_summary(testing_summary, global_step=epoch)
 
