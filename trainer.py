@@ -166,7 +166,7 @@ class TFModelTrainer:
                 # Run the optimizer over and over to train the network.
                 session.run(optimizer)
                 # Get the current accuracy scores by running the "cost" operation on the training and test data sets
-                loss_batch = session.run(loss)
+                loss_batch, accuracy_batch = session.run([loss, accuracy])
 
                 # Log summary
                 streaming_loss += loss_batch
