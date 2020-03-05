@@ -178,8 +178,7 @@ class TFModelTrainer:
 
                 # Save model
                 if epoch % self.save_iter == self.save_iter - 1:
-                    save_path = saver.save(session, os.path.join(self.checkpoint_path, 'checkpoint'),
-                                           global_step=global_step)
+                    save_path = saver.save(session, self.checkpoint_path, global_step=global_step)
                     print("Model saved!")
 
                 # Run validation set
