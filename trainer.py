@@ -125,10 +125,12 @@ class TFModelTrainer:
         with tf.variable_scope('logging'):
             # summary placeholders
             streaming_loss_p = tf.placeholder(tf.float32)
-            accuracy_p = tf.placeholder(tf.float32)
+            streaming_accuracy_p = tf.placeholder(tf.float32)
 
-            summary_op_train = tf.summary.scalar('streaming_loss', streaming_loss_p)
-            summary_op_test = tf.summary.scalar('accuracy', accuracy_p)
+            summary_op_train = tf.summary.merge([tf.summary.scalar('streaming_loss', streaming_loss_p),
+                                                 tf.summary.scalar('streaming_accuracy', streaming_accuracy_p)])
+            summary_op_test = tf.summary.scalar('streaming_loss', streaming_loss_p)
+
 
         # Create ops to save and restore all the variables.
         with tf.variable_scope('saving'):
@@ -167,14 +169,18 @@ class TFModelTrainer:
 
                 # Log summary
                 streaming_loss += loss_batch
+                streaming_accuracy += accuracy_batch
                 if epoch % self.log_iter == self.log_iter - 1:
                     streaming_loss /= self.log_iter
-                    print("Epoch: {} - Training Cost: {}".format(epoch + 1, streaming_loss))
-                    training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss})
+                    streaming_accuracy /= self.log_iter
+                    print("Iteration: {}, Training loss: {:.2f}, Training accuracy: {:.2f}".format(epoch + 1, streaming_loss, streaming_accuracy))
+                    training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss,
+                                                                                streaming_accuracy_p: streaming_accuracy})
                     # Write the current training status to the log files (Which we can view with TensorBoard)
                     training_writer.add_summary(training_summary, global_step=epoch)
 
                     streaming_loss = 0
+                    streaming_accuracy = 0
 
                 # Save model
                 if epoch % self.save_iter == self.save_iter - 1:
