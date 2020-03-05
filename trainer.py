@@ -171,9 +171,18 @@ class TFModelTrainer:
                 streaming_accuracy += accuracy_batch
                 if epoch % self.log_iter == self.log_iter - 1:
                     streaming_loss /= self.log_iter
+<<<<<<< HEAD
                     print("Iteration: {}, Training loss: {:.2f}, Training accuracy: {:.2f}".format(epoch + 1, streaming_loss, streaming_accuracy))
                     training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss,
                                                                                 streaming_accuracy_p: streaming_accuracygit})
+||||||| merged common ancestors
+                    print("Epoch: {} - Training Cost: {}".format(epoch + 1, streaming_loss))
+                    training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss})
+=======
+                    print("Iteration: {}, Training loss: {:.2f}, Training accuracy: {:.2f}".format(epoch + 1, streaming_loss, streaming_accuracy))
+                    training_summary = session.run(summary_op_train, feed_dict={streaming_loss_p: streaming_loss,
+                                                                                streaming_accuracy_p: streaming_accuracy}})
+>>>>>>> 24c263a121ef94b5e4d7a03d33416fe5633d52d6
                     # Write the current training status to the log files (Which we can view with TensorBoard)
                     training_writer.add_summary(training_summary, global_step=epoch)
 
