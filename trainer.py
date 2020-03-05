@@ -159,8 +159,9 @@ class TFModelTrainer:
             initial_step = global_step.eval()
 
             # Running training Set
-            # One epoch is one full run through the training data set.
             streaming_loss = 0
+            streaming_accuracy = 0
+            # One epoch is one full run through the training data set.
             for epoch in range(initial_step, self.training_epochs + 1):
                 # Run the optimizer over and over to train the network.
                 session.run(optimizer)
