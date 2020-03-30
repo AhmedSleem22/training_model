@@ -9,7 +9,7 @@ channels = 3
 
 learning_rate =0.0002
 training_epochs = 100
-tf.reset_default_graph()
+#tf.reset_default_graph()
 
 
 layer_1 = 32    # number of filter of first layer
